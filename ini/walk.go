@@ -25,7 +25,7 @@ func Walk(r io.Reader, walkFn WalkFunc) error {
 		}
 		if line[0] == '[' && line[len(line)-1] == ']' {
 			// Section
-			section = growAndCopy(section, line[1:len(line)-1])
+			section = growAndCopy(section, bytes.TrimSpace(line[1:len(line)-1]))
 			continue
 		}
 

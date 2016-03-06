@@ -21,7 +21,9 @@ k3  =v3
 k4=  v4=
 
 [s3]
-k5=v5`
+k5=v5
+[]
+   k6   =   v6`
 	var results bytes.Buffer
 	err := Walk(strings.NewReader(data), func(s, k, v []byte) error {
 		fmt.Fprintf(&results, "%s.%s=%s\n", s, k, v)
@@ -30,7 +32,7 @@ k5=v5`
 	if err != nil {
 		t.Fatal(err)
 	}
-	expected := ".k1=v1\n.k2=v2\ns1.k3=v3\n s22 .k4=v4=\ns3.k5=v5\n"
+	expected := ".k1=v1\n.k2=v2\ns1.k3=v3\ns22.k4=v4=\ns3.k5=v5\n.k6=v6\n"
 	actual := results.String()
 	if expected != actual {
 		t.Fatalf("unexpected results: %s", actual)
