@@ -5,7 +5,6 @@ import (
 	"bufio"
 	"bytes"
 	"io"
-	"os"
 )
 
 // WalkFunc is the type of the function called for each key visited by Walk.
@@ -57,14 +56,4 @@ func growAndCopy(dest, src []byte) []byte {
 	}
 	copy(dest, src)
 	return dest
-}
-
-// WalkFile is similar to Walk but takes file path for the reader.
-func WalkFile(path string, walkFn WalkFunc) error {
-	f, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	return Walk(f, walkFn)
 }

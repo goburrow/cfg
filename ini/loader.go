@@ -20,13 +20,11 @@ func (l *FileLoader) Load(keys map[string]string) error {
 	}
 	defer f.Close()
 	fn := func(s, n, v []byte) error {
-		var name string
 		if len(s) > 0 {
-			name = fmt.Sprintf("%s.%s", s, n)
+			keys[fmt.Sprintf("%s.%s", s, n)] = string(v)
 		} else {
-			name = string(n)
+			keys[string(n)] = string(v)
 		}
-		keys[name] = string(v)
 		return nil
 	}
 	return Walk(f, fn)
