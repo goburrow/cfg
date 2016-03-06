@@ -25,12 +25,7 @@ func Walk(r io.Reader, walkFn WalkFunc) error {
 		}
 		if line[0] == '[' && line[len(line)-1] == ']' {
 			// Section
-			if cap(section) < len(line)-2 {
-				section = make([]byte, len(line)-2)
-			} else {
-				section = section[:len(line)-2]
-			}
-			copy(section, line[1:len(line)-1])
+			section = growAndCopy(section, line[1:len(line)-1])
 			continue
 		}
 
@@ -46,6 +41,22 @@ func Walk(r io.Reader, walkFn WalkFunc) error {
 		}
 	}
 	return nil
+}
+
+func growAndCopy(dest, src []byte) []byte {
+	if cap(dest) < len(src) {
+		// Grow to multiple of 64
+		const max = int(^uint(0x7f) >> 1)
+		n := len(src)
+		if n < max {
+			n = (n + 63) & ^0x3f
+		}
+		dest = make([]byte, len(src), n)
+	} else {
+		dest = dest[:len(src)]
+	}
+	copy(dest, src)
+	return dest
 }
 
 // WalkFile is similar to Walk but takes file path for the reader.
