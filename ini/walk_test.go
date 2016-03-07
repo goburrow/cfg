@@ -21,9 +21,9 @@ k3  =v3
 k4=  v4=
 
 [s3]
-k5=v5
+k5=v5	
 []
-   k6   =   v6`
+	k6   =   v6`
 	var results bytes.Buffer
 	err := Walk(strings.NewReader(data), func(s, k, v []byte) error {
 		fmt.Fprintf(&results, "%s.%s=%s\n", s, k, v)
@@ -62,5 +62,57 @@ k5 = v5
 	for i := 0; i < b.N; i++ {
 		Walk(r, f)
 		r.Seek(0, 0)
+	}
+}
+
+func TestContinuationLine(t *testing.T) {
+	data := `[section]
+key = a \
+      bb \
+      ccc`
+	var results bytes.Buffer
+	err := Walk(strings.NewReader(data), func(s, k, v []byte) error {
+		fmt.Fprintf(&results, "%s.%s=%s\n", s, k, v)
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := "section.key=a bb ccc\n"
+	actual := results.String()
+	if actual != expected {
+		t.Fatalf("unexpected results: %s", actual)
+	}
+}
+
+func TestEmptyName(t *testing.T) {
+	data := `k1 = v1
+ = v2
+`
+	err := Walk(strings.NewReader(data), func(s, k, v []byte) error {
+		return nil
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if "empty name (line 2)" != err.Error() {
+		t.Fatalf("unexpected error message: %v", err)
+	}
+}
+
+func TestNoDelimiter(t *testing.T) {
+	data := `k1 = v1 \
+ v11 \
+ v111
+v2
+k3 = v3`
+	err := Walk(strings.NewReader(data), func(s, k, v []byte) error {
+		return nil
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if "missing delimiter (line 4)" != err.Error() {
+		t.Fatalf("unexpected error message: %v", err)
 	}
 }
