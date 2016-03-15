@@ -5,6 +5,7 @@ import (
 	"os"
 )
 
+// FileLoader loads ini from file. It flattens keys into the form: section.name = value.
 type FileLoader struct {
 	Path     string
 	Required bool
