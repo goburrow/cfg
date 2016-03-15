@@ -2,6 +2,8 @@ package cfg
 
 import (
 	"errors"
+	"path"
+	"strings"
 	"testing"
 )
 
@@ -35,5 +37,13 @@ func TestOverridingChain(t *testing.T) {
 	}
 	if keys["k1"] != "v1" || keys["k2"] != "v2" || keys["k3"] != "v3" {
 		t.Fatalf("invalid keys: %+v", keys)
+	}
+}
+
+func TestUserConfigPath(t *testing.T) {
+	p := UserConfigPath("abc", "def")
+	expected := path.Join(".config", "abc", "def")
+	if !strings.HasSuffix(p, expected) {
+		t.Fatalf("unexpected user config path: %s", p)
 	}
 }
