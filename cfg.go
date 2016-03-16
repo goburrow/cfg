@@ -6,6 +6,7 @@ import (
 	"os/user"
 	"path"
 
+	"github.com/goburrow/cfg/env"
 	"github.com/goburrow/cfg/ini"
 )
 
@@ -35,17 +36,16 @@ func NewOverridingChain(l ...Loader) Loader {
 }
 
 // DefaultLoader returns a chain of loading ini files from:
-// 1. /etc/appName/config
-// 2. ~/.config/appName/config
+// 1. ~/.config/appName/config
+// 2. System environments variable with appName_ prefix
 func DefaultLoader(appName string) Loader {
 	return NewOverridingChain(
 		&ini.FileLoader{
-			Path:     SystemConfigPath(appName, "config"),
-			Required: false,
-		},
-		&ini.FileLoader{
 			Path:     UserConfigPath(appName, "config"),
 			Required: false,
+		},
+		&env.Loader{
+			Prefix: appName + "_",
 		},
 	)
 }
@@ -54,13 +54,8 @@ func DefaultLoader(appName string) Loader {
 func UserConfigPath(appName, fileName string) string {
 	u, err := user.Current()
 	if err != nil {
-		log.Println("could not get current user: %v", err)
+		log.Println("could not get current user:", err)
 		return path.Join(".config", appName, fileName)
 	}
 	return path.Join(u.HomeDir, ".config", appName, fileName)
-}
-
-// SystemConfigPath returns /etc/appName/fileName.
-func SystemConfigPath(appName, fileName string) string {
-	return path.Join("/etc", appName, fileName)
 }
