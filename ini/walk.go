@@ -44,15 +44,15 @@ func Walk(r io.Reader, walkFn WalkFunc) error {
 				}
 			}
 		}
-		key := bytes.SplitN(line, sep, 2)
-		if len(key) != 2 {
+		i := bytes.Index(line, sep)
+		if i < 0 {
 			return fmt.Errorf("missing delimiter (line %d)", lineNo)
 		}
-		name := bytes.TrimSpace(key[0])
+		name := bytes.TrimSpace(line[:i])
 		if len(name) == 0 {
 			return fmt.Errorf("empty name (line %d)", lineNo)
 		}
-		value := bytes.TrimSpace(key[1])
+		value := bytes.TrimSpace(line[i+1:])
 		err := walkFn(section, name, value)
 		if err != nil {
 			return err
